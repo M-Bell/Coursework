@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/base_style.css" th:href="@{/css/base_style.css}"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/account.css" th:href="@{/css/account.css}"/>
+    <title th:text="${account_user.username}"></title>
+</head>
+<body>
+<!--/*@thymesVar id="account_user" type="com.shyiko.coursework.model.UserProfile"*/-->
+<!--/*@thymesVar id="current_user" type="com.shyiko.coursework.model.UserProfile"*/-->
+<nav th:include="base::navbar"></nav>
+<div class="account-info">
+    <section class="user">
+        <section class="user-info">
+
+            <img class="user-info-img"
+                 th:src="${account_user.profilePhoto != null and account_user.profilePhoto.length > 0}
+             ? 'data:image/jpeg;base64,' + ${account_user.getEncoded()}
+             : @{/images/no-avatar-300x300.png}"
+                 alt="Recipe photo">
+            <section class="user-info-data">
+                <p>Full name: <span th:text="${account_user.fname}"></span></p>
+                <p>Username: <span th:text="${account_user.username}"></span></p>
+                <p>Birthday: <span th:text="${account_user.birthday}"></span></p>
+                <p>Gender: <span th:text="${account_user.gender}"></span></p>
+                <p>Bio: <span th:text="${account_user.bio}"></span></p>
+                <!--/*@thymesVar id="Role" type="com.shyiko.coursework.model.Role"*/-->
+                <div th:if="${account_user.getUsername()==current_user.getUsername() || current_user.getRole()=='ADMIN'}" class="account-control">
+                    <p class="edit-account"><a th:href="@{/edit_user/{username}(username=${account_user.username})}">Edit </a></p>
+                    <form method="post" th:action="@{/logout}">
+                        <button type="submit">Logout</button>
+                    </form>
+                </div>
+            </section>
+        </section>
+        <section class="user-recipes">
+            <p class="user-recipes-header">Your recipes</p>
+            <hr class="recipe-sep"/>
+            <section class="user-recipes-control">
+                <a th:if="${account_user.getUsername()==current_user.getUsername() || current_user.getRole()=='ADMIN'}" href="/create_recipe" class="add-recipe">Add recipe</a>
+                <form id="filter-form" method="get" th:action="@{/account/{username}(username=${account_user.username})}">
+                    <input type="text" name="search" placeholder="Search by name"/>
+                    <label>
+                        <select name="sort" class="sort-options">
+                            <option value="" selected>No sort</option>
+                            <option value="Rating">Rating</option>
+                            <option value="Name">Name</option>
+                        </select>
+                    </label>
+                    <div class="user-recipes-control-button-group">
+                        <button class="user-recipes-control-button" type="submit">Submit</button>
+                        <button class="user-recipes-control-button" id="reset-button" type="submit" onclick="reset()">Reset</button>
+                    </div>
+                </form>
+            </section>
+
+            <script>
+                function reset() {
+                    const filterForm = document.getElementById("filter-form");
+                    const resetButton = document.getElementById("reset-button");
+
+                    resetButton.addEventListener("click", function () {
+                        const formElements = filterForm.elements;
+                        for (let i = 0; i < formElements.length; i++) {
+                            const element = formElements[i];
+                            element.value = '';
+                        }
+                        filterForm.dispatchEvent(new Event("submit"));
+                    });
+                }
+            </script>
+
+
+            <section class="recipe-list" style="height: 400px; overflow-y: scroll;">
+                <div th:if="${#lists.isEmpty(recipes)}">
+                    <p>No recipes found</p>
+                </div>
+                <!--/*@thymesVar id="recipes" type="java.util.List"*/-->
+                <!--/*@thymesVar id="recipe" type="com.shyiko.coursework.model.Recipe"*/-->
+                <div th:each="recipe : ${recipes}" class="recipe-block">
+                    <h2 th:text="${recipe.name}"></h2>
+                    <p><span th:text="${recipe.rating}"></span> ★</p>
+                    <section class="recipe-control">
+                        <a th:href="@{/recipe/{id}(id=${recipe.id})}" class="view-recipe">View</a>
+                        <a th:if="${account_user.getUsername()==current_user.getUsername() || current_user.getRole()=='ADMIN'}" th:href="@{/edit_recipe/{id}(id=${recipe.id})}" class="edit-recipe">Edit</a>
+                        <form th:if="${account_user.getUsername()==current_user.getUsername() || current_user.getRole()=='ADMIN'}" th:action="@{/delete_recipe/{id}(id=${recipe.id})}" method="post">
+                            <input type="hidden" name="id" value="123"/>
+                            <button type="submit">Delete</button>
+                        </form>
+                    </section>
+                </div>
+            </section>
+        </section>
+    </section>
+</div>
+<footer th:replace="base::footer"></footer>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/base_style.css" th:href="@{/css/base_style.css}"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/top_chefs.css" th:href="@{/css/top_chefs.css}"/>
+
+    <title>Top chefs</title>
+</head>
+<body>
+<nav th:include="base::navbar"></nav>
+<div th:if="${users!=null && !users.isEmpty()}" class="recipe-list">
+    <div th:each="user : ${users}" class="recipe-block">
+        <div class="recipe-block-img">
+            <!--/*@thymesVar id="Base64" type="java.util.Base64"*/-->
+            <img class="recipe-image"
+                 th:src="${user.profilePhoto != null and user.profilePhoto.length > 0}
+             ? 'data:image/jpeg;base64,' + ${user.getEncoded()}
+             : @{/images/img.png}"
+                 alt="Recipe photo">
+        </div>
+        <div class="recipe-block-info">
+            <h3 class="recipe-block-info-header" th:text="${user.username}"></h3>
+            <div class="recipe-block-info-main">
+                <a href="#" th:href="@{/account/{username}(username=${user.username})}" class="recipe-block-info-link">Learn
+                    more...</a>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="base::footer"></footer>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <!-- Database connection settings -->
+    <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+    <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/Coursework</property>
+    <property name="hibernate.connection.username">postgres</property>
+    <property name="hibernate.connection.password">Laim3445</property>
+
+    <!-- Hibernate configuration -->
+    <property name="hibernate.show_sql">true</property>
+    <property name="hibernate.format_sql">true</property>
+
+    <mapping class="com.shyiko.coursework.model.UserProfile"/>
+    <mapping class="com.shyiko.coursework.model.Gender"/>
+    <mapping class="com.shyiko.coursework.model.Allergy"/>
+    <mapping class="com.shyiko.coursework.model.Ctegory"/>
+    <mapping class="com.shyiko.coursework.model.Comment"/>
+    <mapping class="com.shyiko.coursework.model.Complexity"/>
+    <mapping class="com.shyiko.coursework.model.Recipe"/>
+    <mapping class="com.shyiko.coursework.model.RecipeAllergy"/>
+    <mapping class="com.shyiko.coursework.model.Role"/>
+    <mapping class="com.shyiko.coursework.model.UserRating"/>
+  </session-factory>
+</hibernate-configuration>

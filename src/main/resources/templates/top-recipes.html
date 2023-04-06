@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/base_style.css" th:href="@{/css/base_style.css}"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/top_recipes.css" th:href="@{/css/top_recipes.css}"/>
+    <title>Top recipes</title>
+</head>
+<body>
+<nav th:include="base::navbar"></nav>
+<div th:if="${recipes!=null && !recipes.isEmpty()}" class="recipe-list">
+    <div th:each="recipe : ${recipes}" class="recipe-block">
+        <div class="recipe-block-img">
+            <!--/*@thymesVar id="Base64" type="java.util.Base64"*/-->
+            <img class="recipe-image"
+                 th:src="${recipe.photo != null and recipe.photo.length > 0}
+             ? 'data:image/jpeg;base64,' + ${recipe.getEncoded()}
+             : @{/images/img.png}"
+                 alt="Recipe photo">
+        </div>
+        <div class="recipe-block-info">
+            <h3 class="recipe-block-info-header" th:text="${recipe.name}"></h3>
+            <div class="recipe-block-info-main">
+                <p>Rating: <span th:text="${recipe.rating}+'/5'"></span></p>
+                <p>Cooking Time: <span th:text="${recipe.cookingTime}"></span></p>
+                <p>Price: <span th:text="${recipe.price} + ' UAH'"></span></p>
+                <a href="#" th:href="@{/recipe/{id}(id=${recipe.id})}" class="recipe-block-info-link">Learn
+                    more...</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="no-recipes" th:if="${recipes==null || recipes.isEmpty()}"> No recipes found</div>
+<footer th:replace="base::footer"></footer>
+</body>
+</html>

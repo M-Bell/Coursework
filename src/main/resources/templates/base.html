@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/base_style.css" th:href="@{/css/base_style.css}"/>
+    <title>Base Template</title>
+</head>
+<body>
+
+<nav th:fragment="navbar">
+    <img class="logo" th:src="@{/images/group_17.svg}" alt="logo" src="../static/images/group_17.svg"/>
+    <ul class="menu">
+        <li class="menu_option"><a class="menu_link" href="/">Home</a></li>
+<!--        <li class="menu_option"><a class="menu_link" href="/">Plan a meal</a></li>-->
+        <li class="menu_option"><a class="menu_link" href="/top-chefs">Top chefs</a></li>
+        <li class="menu_option"><a class="menu_link" href="/top-recipes">Top recipes</a></li>
+    </ul>
+    <div class="account">
+        <!--/*@thymesVar id="current_user" type="com.shyiko.coursework.model.UserProfile"*/-->
+        <a class="menu_link" th:href="@{'/account/' + ${current_user.username}}">My account</a>
+        <!--/*@thymesVar id="imageData" type="byte[]"*/-->
+        <img class="avatar"
+             th:src="${current_user.profilePhoto != null and current_user.profilePhoto.length > 0}
+             ? 'data:image/jpeg;base64,' + ${current_user.getEncoded()}
+             : @{/images/no-avatar-300x300.png}"  alt="avatar">
+    </div>
+</nav>
+
+<footer th:fragment="footer">
+    <hr class="footer_sep">
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+        dolore
+        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+        commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
+        est
+        laborum.
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/base_style.css" th:href="@{/css/base_style.css}"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/current_recipe.css"
+          th:href="@{/css/current_recipe.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script th:src="@{/js/rating.js}"></script>
+    <title>Child Template</title>
+</head>
+<body>
+<nav th:replace="base::navbar"></nav>
+<div class="container">
+    <div class="recipe-details">
+        <!--/*@thymesVar id="recipe" type="com.shyiko.coursework.model.Recipe"*/-->
+        <h1 class="recipe-header" th:text="${recipe.getName()}"></h1>
+        <p class="recipe-author"><span th:text="${recipe.author.username}"></span></p>
+        <hr class="recipe-sep">
+        <img class="recipe-img" th:src="${recipe.photo != null and recipe.photo.length > 0}
+             ? 'data:image/jpeg;base64,' + ${recipe.getEncoded()}
+             : @{/images/img.png}" alt="Recipe Image"/>
+        <div class="recipe-details-data">
+            <div class="recipe-details-data-fst">
+                <p class="recipe-details-unit"><span th:text="${recipe.cookingTime}"></span> ◷</p>
+                <p class="recipe-details-unit"><span th:text="${recipe.price}"></span> ₴</p>
+                <p class="recipe-details-unit"><span th:text="${recipe.rating}"></span> <span class="voted" th:text="' (' + ${recipe.voted} + ') '"></span><span class="fa fa-star checked"></span></p>
+            </div>
+            <div class="recipe-details-data-snd">
+                <p class="recipe-details-unit"><strong>Complexity:</strong> <span th:text="${recipe.complexity}"></span></p>
+                <p class="recipe-details-unit"><strong>Category:</strong> <span th:text="${recipe.category}"></span></p>
+            </div>
+        </div>
+        <div class="recipe-data"><strong>Ingredients:</strong> <br> <div class="recipe-data-block"><textarea class="recipe-textarea" th:text="${recipe.ingredients}"></textarea></div></div>
+        <div class="recipe-data"><strong>Instruction:</strong> <br> <div class="recipe-data-block"><textarea class="recipe-textarea" th:text="${recipe.instruction}"></textarea></div></div>
+        <!--        <p><strong>Voted:</strong> <span th:text="${recipe.voted}"></span></p>-->
+    </div>
+    <div id="rating">
+        <!--/*@thymesVar id="recipe" type="com.shyiko.coursework.model.Recipe"*/-->
+        <span class="fa fa-star" th:classappend="${chosen_rating >= 1 ? 'checked' : ''}"
+              th:onclick="'doRate(' + ${recipe.id} + ', 1)'"></span>
+        <span class="fa fa-star" th:classappend="${chosen_rating >= 2 ? 'checked' : ''}"
+              th:onclick="'doRate(' + ${recipe.id} + ', 2)'"></span>
+        <span class="fa fa-star" th:classappend="${chosen_rating >= 3 ? 'checked' : ''}"
+              th:onclick="'doRate(' + ${recipe.id} + ', 3)'"></span>
+        <span class="fa fa-star" th:classappend="${chosen_rating >= 4 ? 'checked' : ''}"
+              th:onclick="'doRate(' + ${recipe.id} + ', 4)'"></span>
+        <span class="fa fa-star" th:classappend="${chosen_rating >= 5 ? 'checked' : ''}"
+              th:onclick="'doRate(' + ${recipe.id} + ', 5)'"></span>
+    </div>
+
+    <script>
+        function doRate(id, value) {
+            const form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', `/rate-recipe/${id}/${value}`);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+
+    <div class="comment-section">
+        <h2>Comments</h2>
+        <!--/*@thymesVar id="comments" type="java.util.List"*/-->
+        <!--/*@thymesVar id="comment" type="com.shyiko.coursework.model.Comment"*/-->
+        <div th:hidden="${comments==null or comments.isEmpty() }" class="comment-list">
+            <div th:each="comment : ${comments}" class="comment-unit">
+                <a class="comment-header" th:href="'/account/' + ${comment.user.username}"><h3
+                        th:text="${comment.user.username}"></h3></a>
+                <div class="comment-body">
+                    <div class="comment-text" th:text="${comment.commentText}"></div>
+                    <span class="comment-date" th:text="${#dates.format(comment.postTime, 'dd/MM/yyyy')}"></span>
+                </div>
+            </div>
+        </div>
+        <!--/*@thymesVar id="recipe" type="com.shyiko.coursework.model.Recipe"*/-->
+        <form class="comment-form" th:action="@{/post-comment/{recipeId}(recipeId=${recipe.id})}" method="post">
+            <textarea name="comment" placeholder="Write a comment..."></textarea>
+            <button class="submit-button" type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+<footer th:replace="base::footer"></footer>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Input Fields and Image Example</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/login.css" th:href="@{/css/login.css}"/>
+</head>
+<body>
+<div class="container">
+    <div class="form-container">
+        <h3 class="login-header">Login</h3>
+        <hr class="header-sep">
+        <form class="form-input" action="/login" method="post">
+            <label for="name">Username:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Submit">
+            <p class="register-link">Do not have an account: <a class="register" href="/register">register</a></p>
+        </form>
+    </div>
+</div>
+</body>
+</html>

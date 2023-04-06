@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/base_style.css" th:href="@{/css/base_style.css}"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/recipes.css" th:href="@{/css/recipes.css}"/>
+    <title>Child Template</title>
+</head>
+<body>
+<nav th:include="base::navbar"></nav>
+<!--/*@thymesVar id="recipes" type="java.util.List"*/-->
+<!--/*@thymesVar id="recipe" type="com.shyiko.coursework.model.Recipe"*/-->
+<div class="main-content">
+    <form id="filter-form" class="filter-form" action="/" th:action="@{/}" method="get">
+        <label for="page" hidden></label>
+        <input id="page" type="number" name="page" th:default="0" hidden>
+        <div class="filter-block">
+            <label class="filter-block-header">Search:</label>
+            <div class="filter-data-block">
+                <p class="form-label">Search by name: <input class="form-filter-data" type="text" name="search"
+                                                             placeholder="Search..."/>
+                </p>
+            </div>
+        </div>
+        <br>
+        <br>
+        <div class="filter-block">
+            <label class="filter-block-header">Sort:</label>
+            <div class="filter-data-block">
+                <p class="form-label">Choose category:</p>
+                <!--/*@thymesVar id="current_sort" type="java.lang.String"*/-->
+                <select name="form-sort" class="form-filter-data">
+                    <option value="" th:selected="${current_sort == null || current_sort == ''}">No sort</option>
+                    <option value="Name" th:selected="${current_sort == 'Name'}">Name</option>
+                    <option value="Price" th:selected="${current_sort == 'Price'}">Price</option>
+                    <option value="Rating" th:selected="${current_sort== 'Rating'}">Rating</option>
+                </select>
+            </div>
+        </div>
+        <br>
+        <br>
+        <div class="filter-block">
+            <label class="filter-block-header">Price range:</label>
+            <div class="filter-data-block">
+                <p class="form-label">Min price: <input class="form-filter-data" type="number" name="minPrice"
+                                                        placeholder="Min price"/></p>
+                <p class="form-label">Max price: <input class="form-filter-data" type="number" name="maxPrice"
+                                                        placeholder="Max price"/></p>
+            </div>
+        </div>
+        <br/><br/>
+
+        <div class="filter-block">
+            <label class="filter-block-header">Category:</label>
+            <div class="checkbox-filter">
+                <div th:each="category : ${categories}">
+                    <input type="checkbox" name="categories" class="checkbox-filter-unit" th:value="${category}"
+                           th:id="${'cat-' + category}"
+                           th:name="'categories'"
+                           th:checked="${chosen_categories!=null && chosen_categories.contains(category)}">
+                    <label class="checkbox-label" th:for="${'cat-' + category}" th:text="${category}"></label>
+                    <br/>
+                </div>
+            </div>
+        </div>
+        <br/><br/>
+
+        <div class="filter-block">
+            <label class="filter-block-header">Time range:</label>
+            <div class="filter-data-block">
+                <p class="form-label">Min time: <input class="form-filter-data" type="time" name="minTime"
+                                                       placeholder="Min time"/></p>
+                <p class="form-label">Max time: <input class="form-filter-data" type="time" name="maxTime"
+                                                       placeholder="Max time"/></p>
+            </div>
+        </div>
+        <br/><br/>
+        <div class="filter-block">
+            <label class="filter-block-header">Complexity:</label>
+            <div class="checkbox-filter">
+                <div class="checkbox-group">
+                    <input class="checkbox-filter-unit" type="checkbox" name="complexities" th:value="'Easy'"
+                           th:id="'Easy'"
+                           th:name="'complexities'"
+                           th:checked="${chosenComplexities!=null && chosenComplexities.contains('Easy')}">
+                    <label class="checkbox-label" th:for="'Easy'" th:text="'Easy'"></label>
+                </div>
+                <div class="checkbox-group">
+                    <input class="checkbox-filter-unit" type="checkbox" name="complexities" th:value="'Moderate'"
+                           th:id="'Moderate'"
+                           th:name="'complexities'"
+                           th:checked="${chosenComplexities!=null && chosenComplexities.contains('Moderate')}">
+                    <label class="checkbox-label" th:for="'Moderate'" th:text="'Moderate'"></label>
+                </div>
+                <div class="checkbox-group">
+                    <input class="checkbox-filter-unit" type="checkbox" name="complexities" th:value="'Advanced'"
+                           th:id="'Advanced'"
+                           th:name="'complexities'"
+                           th:checked="${chosenComplexities!=null && chosenComplexities.contains('Advanced')}">
+
+                    <label class="checkbox-label" th:for="'Advanced'" th:text="'Advanced'"></label>
+                </div>
+            </div>
+        </div>
+        <br/><br/>
+        <div class="filter-block">
+
+            <label class="filter-block-header">Excluded allergies:</label>
+            <div class="checkbox-filter">
+                <div class="checkbox-group" th:each="allergy : ${allergies}">
+                    <input type="checkbox" class="checkbox-filter-unit" th:id="${'allergy-' + allergy}"
+                           th:name="'allergies'" th:value="${allergy}"
+                           th:checked="${chosen_allergies!=null && chosen_allergies.contains(allergy)}">
+                    <label class="checkbox-label" th:for="${'allergy-' + allergy}" th:text="${allergy}"></label>
+                </div>
+            </div>
+        </div>
+        <br/><br/>
+        <div class="button-group">
+            <button class="form-button" type="submit" id="submit-button">Filter</button>
+            <button class="form-button" type="button" id="reset-button">Reset</button>
+        </div>
+        <script>
+            const filterForm = document.querySelector("#filter-form");
+            const resetButton = document.querySelector('#reset-button');
+            resetButton.addEventListener('click', () => {
+                const checkboxes = document.querySelectorAll('.checkbox-filter-unit');
+                for (const checkbox of checkboxes) {
+                    checkbox.removeAttribute("checked");
+                }
+                filterForm.reset(); // resets the form fields to their default values
+                filterForm.submit(); // submits the form data to the server
+            });
+
+            function setVal(page) {
+                const input = filterForm.querySelector("#page");
+                input.removeAttribute("value");
+                input.setAttribute("value", Number(page));
+                filterForm.submit(); // submits the form data to the server
+            }
+        </script>
+
+    </form>
+
+
+    <div th:if="${recipes!=null && !recipes.isEmpty()}" class="recipe-list">
+        <div th:each="recipe : ${recipes}" class="recipe-block">
+            <div class="recipe-block-img">
+                <!--/*@thymesVar id="Base64" type="java.util.Base64"*/-->
+                <img class="recipe-image"
+                     th:src="${recipe.photo != null and recipe.photo.length > 0}
+             ? 'data:image/jpeg;base64,' + ${recipe.getEncoded()}
+             : @{/images/img.png}"
+                     alt="Recipe photo">
+            </div>
+            <div class="recipe-block-info">
+                <h3 class="recipe-block-info-header" th:text="${recipe.name}"></h3>
+                <div class="recipe-block-info-main">
+                    <p>Rating: <span th:text="${recipe.rating}+'/5'"></span></p>
+                    <p>Cooking Time: <span th:text="${recipe.cookingTime}"></span></p>
+                    <p>Price: <span th:text="${recipe.price} + ' UAH'"></span></p>
+                    <a href="#" th:href="@{/recipe/{id}(id=${recipe.id})}" class="recipe-block-info-link">Learn
+                        more...</a>
+                </div>
+            </div>
+        </div>
+        <form class="page-nums" th:if="${links>1}">
+            <ul class="page-link-list">
+                <li class="page-link" th:each="i : ${#numbers.sequence(1, links)}">
+                    <button th:if="${current_page == i - 1}" class="checked" type="button" th:text="${i}" th:onclick="'setVal(' + ${i - 1} + ');'"></button>
+                    <button th:if="${current_page != i - 1}" class="unchecked" type="button" th:text="${i}" th:onclick="'setVal(' + ${i - 1} + ');'"></button>
+
+                </li>
+            </ul>
+        </form>
+    </div>
+    <div class="no-recipes" th:if="${recipes==null || recipes.isEmpty()}"> No recipes found</div>
+</div>
+<footer th:replace="base::footer"></footer>
+</body>
+</html>
