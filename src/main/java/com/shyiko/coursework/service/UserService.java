@@ -20,7 +20,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Service
-public class UserService implements IUserService {
+public class UserService {
 
     @Autowired
     private UserDao userDao;
@@ -31,19 +31,16 @@ public class UserService implements IUserService {
     @Autowired
     private HttpServletRequest request;
 
-    @Override
     @Transactional
     public void saveUser(UserProfile user) {
-        userDao.saveUser(user);
+        userDao.save(user);
     }
 
-    @Override
     public boolean isUsernameAvailable(String username) {
         UserProfile user = userDao.getUserByUsername(username);
         return user == null;
     }
 
-    @Override
     public UserProfile registerUser(String username, String password, String gender, LocalDate date, byte[] photo, String fullName, String bio) {
 
         UserProfile userProfile = new UserProfile(username, fullName, password, photo, date, bio, gender, Role.USER);
@@ -51,7 +48,6 @@ public class UserService implements IUserService {
         return userProfile;
     }
 
-    @Override
     public UserProfile authenticateUser(String username, String password) {
         UserProfile user = userDao.getUserByUsername(username);
         if (user != null && password.equals(user.getPassword())) {
@@ -61,12 +57,10 @@ public class UserService implements IUserService {
         return null;
     }
 
-    @Override
     public UserProfile getUserById(Long id) {
-        return userDao.getUserById(id);
+        return (UserProfile) userDao.getByKey(UserProfile.class, id);
     }
 
-    @Override
     public String getCurrentUserPhoto() {
         UserProfile userProfile = (UserProfile) request.getSession().getAttribute("currentUser");
         byte[] data = null;
@@ -85,12 +79,10 @@ public class UserService implements IUserService {
 
     }
 
-    @Override
     public UserProfile getCurrentUser() {
         return (UserProfile) request.getSession().getAttribute("currentUser");
     }
 
-    @Override
     public boolean isLoggedIn() {
         return request.getSession().getAttribute("currentUser") != null;
     }
@@ -109,7 +101,7 @@ public class UserService implements IUserService {
         userProfile.setBirthday(date);
         userProfile.setBio(bio);
         if (photoBytes != null) userProfile.setProfilePhoto(photoBytes);
-        userDao.updateUser(userProfile);
+        userDao.update(userProfile);
         return userProfile;
     }
 
@@ -118,7 +110,7 @@ public class UserService implements IUserService {
     }
 
     public List<UserProfile> getTopUsers(int topUsers) {
-        List<UserProfile> recipes = userDao.getAllUsers();
+        List<UserProfile> recipes = (List<UserProfile>) userDao.getAll(UserProfile.class);
 
         recipes.sort((o1, o2) -> Double.compare(recipeDao.getRecipeByAuthor(
                 o1.getUsername()).stream().mapToDouble(

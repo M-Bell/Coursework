@@ -16,60 +16,7 @@ import java.util.List;
 @Repository
 @Transactional
 @Component
-public class RecipeDao {
-    @Autowired
-    private EntityManager entityManager;
-    @Autowired
-    private EntityTransaction transaction;
-
-    public void saveRecipe(Recipe recipe) {
-        try {
-            // Begin transaction
-            transaction.begin();
-
-            // Save user to the database
-            entityManager.persist(recipe);
-
-            // Commit transaction
-            transaction.commit();
-
-        } catch (Exception e) {
-            // Rollback transaction if there is an error
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
-    }
-
-    public List<Recipe> getAllRecipes() {
-        TypedQuery<Recipe> query = entityManager.createQuery(
-                "SELECT u from Recipe u", Recipe.class);
-        return query.getResultList();
-    }
-
-    public Recipe getRecipeById(Long id) {
-        return entityManager.find(Recipe.class, id);
-    }
-
-    public void addVoted(Long id) {
-        try {
-            transaction.begin();
-            TypedQuery<Recipe> query = entityManager.createQuery(
-                    "SELECT u from Recipe u WHERE u.id = :id", Recipe.class);
-            query.setParameter("id", id);
-            Recipe recipe = query.getSingleResult();
-            recipe.setVoted(recipe.getVoted() + 1);
-            entityManager.merge(recipe);
-            transaction.commit();
-        } catch (Exception e) {
-            // Rollback transaction if there is an error
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
-    }
+public class RecipeDao extends BaseDao {
 
     public void updateRating(Long recipeId) {
         try {
@@ -101,21 +48,6 @@ public class RecipeDao {
                 "SELECT u from Recipe u WHERE u.author.username = :username", Recipe.class);
         query.setParameter("username", username);
         return query.getResultList();
-    }
-
-    public void updateRecipe(Recipe recipe) {
-        try {
-            transaction.begin();
-            entityManager.merge(recipe);
-            transaction.commit();
-        } catch (Exception e) {
-            // Rollback transaction if there is an error
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
-
     }
 
     public void deleteRecipe(Long id) {

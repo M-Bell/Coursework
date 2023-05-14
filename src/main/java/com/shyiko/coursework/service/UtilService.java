@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UtilService implements IUtilService {
+public class UtilService {
     @Autowired
     private UtilDao utilDao;
 
@@ -29,32 +29,32 @@ public class UtilService implements IUtilService {
     @Autowired
     private RecipeAllergyDao recipeAllergyDao;
 
-    @Override
     public List<String> getAllCategories() {
-        return utilDao.getAllCategories().stream().map(Category::getName).collect(Collectors.toList());
+        return ((List<Category>) utilDao.getAll(Category.class)).stream().map(Category::getName).collect(Collectors.toList());
     }
 
-    @Override
     public List<String> getAllAllergies() {
-        return utilDao.getAllAllergies().stream().map(Allergy::getName).collect(Collectors.toList());
+        return ((List<Allergy>) utilDao.getAll(Allergy.class)).stream().map(Allergy::getName).collect(Collectors.toList());
     }
 
-    @Override
     public Category getCategoryByName(String name) {
-        return utilDao.getCategoryByName(name);
+        return (Category) utilDao.getByKey(Category.class, name);
     }
 
-    @Override
     public Allergy getAllergyByName(String name) {
-        return utilDao.getAllergyByName(name);
+        return (Allergy) utilDao.getByKey(Allergy.class, name);
     }
 
     public void rateRecipe(Long recipeId, Integer rating) {
-        if (utilDao.userVoted(userService.getCurrentUser(), recipeId)) {
-            utilDao.updateUserVotedRating(userService.getCurrentUser(), recipeId, rating);
+        UserRating oldRating = (UserRating) ratingDao.getByKey(
+                UserRating.class,
+                new UserRating.UserRatingId(userService.getCurrentUser().getId(), recipeId));
+        if (oldRating!=null) {
+            oldRating.setRating(BigDecimal.valueOf(rating));
+            ratingDao.update(oldRating);
         } else {
             recipeService.addVoted(recipeId);
-            utilDao.saveRating(new UserRating(userService.getCurrentUser(), recipeService.getRecipeById(recipeId), BigDecimal.valueOf(rating)));
+            ratingDao.save(new UserRating(userService.getCurrentUser(), recipeService.getRecipeById(recipeId), BigDecimal.valueOf(rating)));
         }
         recipeService.updateRating(recipeId);
     }
@@ -66,7 +66,7 @@ public class UtilService implements IUtilService {
     }
 
     public double getRating(Long id, UserProfile currentUser) {
-        UserRating rating = ratingDao.getUserRating(id, currentUser.getId());
+        UserRating rating = (UserRating) ratingDao.getByKey(UserRating.class, new UserRating.UserRatingId(currentUser.getId(), id));
         return rating == null ? 0 : rating.getRating().doubleValue();
     }
 }

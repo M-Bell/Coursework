@@ -3,6 +3,7 @@ package com.shyiko.coursework.service;
 import com.shyiko.coursework.dao.RecipeAllergyDao;
 import com.shyiko.coursework.dao.RecipeDao;
 import com.shyiko.coursework.dao.UtilDao;
+import com.shyiko.coursework.model.Allergy;
 import com.shyiko.coursework.model.Recipe;
 import com.shyiko.coursework.model.RecipeAllergy;
 import com.shyiko.coursework.util.Constants;
@@ -35,40 +36,38 @@ public class RecipeService {
     private UtilDao utilDao;
 
     public void saveRecipe(Recipe recipe) {
-        recipeDao.saveRecipe(recipe);
+        recipeDao.save(recipe);
     }
 
-    public Recipe createRecipe(String name, MultipartFile photo, String instruction,
-                               String ingredients, Time cookingTime, String complexity,
-                               Double price, String category, List<String> allergies) {
+    public Recipe createRecipe(String name, MultipartFile photo, String instruction, String ingredients, Time cookingTime, String complexity, Double price, String category, List<String> allergies) {
         byte[] photoBytes = null;
         try {
             photoBytes = photo.getBytes();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Recipe recipe = new Recipe(name, photoBytes, instruction,
-                ingredients, cookingTime, complexity, new BigDecimal(0),
-                new BigDecimal(price), 0, category, userService.getCurrentUser());
+        Recipe recipe = new Recipe(name, photoBytes, instruction, ingredients, cookingTime, complexity, new BigDecimal(0), new BigDecimal(price), 0, category, userService.getCurrentUser());
 
         saveRecipe(recipe);
-        for (String allergy : allergies) {
-            recipeAllergyDao.saveRecipeAllergy(new RecipeAllergy(recipe, utilDao.getAllergyByName(allergy)));
+        if (allergies != null) for (String allergy : allergies) {
+            recipeAllergyDao.save(new RecipeAllergy(recipe, (Allergy) utilDao.getByKey(Allergy.class, allergy)));
         }
 
         return recipe;
     }
 
     public List<Recipe> getAllRecipes() {
-        return recipeDao.getAllRecipes();
+        return (List<Recipe>) recipeDao.getAll(Recipe.class);
     }
 
     public Recipe getRecipeById(Long id) {
-        return recipeDao.getRecipeById(id);
+        return (Recipe) recipeDao.getByKey(Recipe.class, id);
     }
 
     public void addVoted(Long recipeId) {
-        recipeDao.addVoted(recipeId);
+        Recipe recipe = getRecipeById(recipeId);
+        recipe.setVoted(recipe.getVoted() + 1);
+        recipeDao.save(recipe);
     }
 
     public void updateRating(Long recipeId) {
@@ -87,7 +86,7 @@ public class RecipeService {
             e.printStackTrace();
         }
 
-        Recipe recipe = recipeDao.getRecipeById(id);
+        Recipe recipe = (Recipe) recipeDao.getByKey(Recipe.class, id);
         recipe.setName(name);
         recipe.setPhoto(photoBytes);
         recipe.setInstruction(instruction);
@@ -96,11 +95,11 @@ public class RecipeService {
         recipe.setComplexity(complexity);
         recipe.setPrice(new BigDecimal(price));
         recipe.setCategory(category);
-        recipeDao.updateRecipe(recipe);
+        recipeDao.update(recipe);
         recipeAllergyDao.removeExisting(recipe);
         if (allergies == null) return recipe;
         for (String allergy : allergies) {
-            recipeAllergyDao.saveRecipeAllergy(new RecipeAllergy(recipe, utilDao.getAllergyByName(allergy)));
+            recipeAllergyDao.save(new RecipeAllergy(recipe, (Allergy) utilDao.getByKey(Allergy.class, allergy)));
         }
 
         return recipe;
@@ -110,10 +109,7 @@ public class RecipeService {
         recipeDao.deleteRecipe(id);
     }
 
-    public List<Recipe> getAllRecipes(Double minPrice, Double maxPrice,
-                                      List<String> categories, LocalTime minTime,
-                                      LocalTime maxTime, List<String> complexities,
-                                      List<String> allergies, String searchPrompt) {
+    public List<Recipe> getAllRecipes(Double minPrice, Double maxPrice, List<String> categories, LocalTime minTime, LocalTime maxTime, List<String> complexities, List<String> allergies, String searchPrompt) {
         List<Recipe> recipes = getAllRecipes();
         List<Recipe> excludedRecipes = new ArrayList<>();
 
@@ -134,9 +130,7 @@ public class RecipeService {
         }
         if (allergies != null && !allergies.isEmpty()) {
             for (Recipe recipe : recipes) {
-                List<String> recipeAllergies = recipeAllergyDao.getRecipeAllergies(recipe.getId())
-                        .stream()
-                        .map(x -> x.getAllergy().getName()).toList();
+                List<String> recipeAllergies = recipeAllergyDao.getRecipeAllergies(recipe.getId()).stream().map(x -> x.getAllergy().getName()).toList();
 
                 if (!Collections.disjoint(recipeAllergies, allergies)) {
                     excludedRecipes.add(recipe);
@@ -157,16 +151,15 @@ public class RecipeService {
         List<Recipe> result = recipeDao.getRecipeByAuthor(username);
         if (search != null && search.length() > 0)
             result = result.stream().filter(x -> x.getName().contains(search)).collect(Collectors.toList());
-        if (sort != null)
-            switch (sort) {
-                case "Name" -> result.sort(Comparator.comparing(Recipe::getName));
-                case "Rating" -> result.sort((o1, o2) -> o2.getRating().compareTo(o1.getRating()));
-            }
+        if (sort != null) switch (sort) {
+            case "Name" -> result.sort(Comparator.comparing(Recipe::getName));
+            case "Rating" -> result.sort((o1, o2) -> o2.getRating().compareTo(o1.getRating()));
+        }
         return result;
     }
 
     public List<Recipe> getTopRecipes(int topRecipes) {
-        List<Recipe> recipes = recipeDao.getAllRecipes();
+        List<Recipe> recipes = (List<Recipe>) recipeDao.getAll(Recipe.class);
         recipes.sort((o1, o2) -> o2.getRating().compareTo(o1.getRating()));
         int lastElem = Math.min(topRecipes, recipes.size());
         return recipes.subList(0, lastElem);
@@ -185,12 +178,11 @@ public class RecipeService {
     }
 
     public List<Recipe> sortRecipes(List<Recipe> filteredRecipes, String sort) {
-        if (sort != null)
-            switch (sort) {
-                case "Name" -> filteredRecipes.sort(Comparator.comparing(Recipe::getName));
-                case "Rating" -> filteredRecipes.sort((o1, o2) -> o2.getRating().compareTo(o1.getRating()));
-                case "Price" -> filteredRecipes.sort((o1, o2) -> o2.getPrice().compareTo(o1.getPrice()));
-            }
+        if (sort != null) switch (sort) {
+            case "Name" -> filteredRecipes.sort(Comparator.comparing(Recipe::getName));
+            case "Rating" -> filteredRecipes.sort((o1, o2) -> o2.getRating().compareTo(o1.getRating()));
+            case "Price" -> filteredRecipes.sort((o1, o2) -> o2.getPrice().compareTo(o1.getPrice()));
+        }
         return filteredRecipes;
     }
 }

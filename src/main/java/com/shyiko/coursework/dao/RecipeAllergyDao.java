@@ -18,33 +18,11 @@ import java.util.List;
 @Repository
 @Transactional
 @Component
-public class RecipeAllergyDao {
+public class RecipeAllergyDao extends BaseDao {
     @Autowired
     private EntityManager entityManager;
     @Autowired
     private EntityTransaction transaction;
-
-    public void saveRecipeAllergy(RecipeAllergy recipeAllergy) {
-        try {
-            // Begin transaction
-            transaction.begin();
-
-            // Save user to the database
-            entityManager.persist(recipeAllergy);
-
-            // Commit transaction
-            transaction.commit();
-
-            System.out.println("User saved successfully");
-        } catch (Exception e) {
-            // Rollback transaction if there is an error
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
-
-    }
 
     public void removeExisting(Recipe recipe) {
         try {

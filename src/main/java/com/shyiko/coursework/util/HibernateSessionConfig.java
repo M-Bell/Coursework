@@ -9,15 +9,6 @@ import org.springframework.context.annotation.Bean;
 @org.springframework.context.annotation.Configuration
 public class HibernateSessionConfig {
 
-//    @Bean
-//    public SessionFactory sessionFactory() {
-//        try {
-//            return new Configuration().configure().buildSessionFactory();
-//        } catch (Exception e) {
-//            throw new RuntimeException("Error building SessionFactory", e);
-//        }
-//    }
-
     @Bean
     public EntityManager entityManager() {
         EntityManagerFactory factory = Persistence.createEntityManagerFactory("com.shyiko.coursework");

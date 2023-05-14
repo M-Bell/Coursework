@@ -16,7 +16,7 @@
     <div class="recipe-details">
         <!--/*@thymesVar id="recipe" type="com.shyiko.coursework.model.Recipe"*/-->
         <h1 class="recipe-header" th:text="${recipe.getName()}"></h1>
-        <p class="recipe-author"><span th:text="${recipe.author.username}"></span></p>
+        <a th:href="'/account/'+${recipe.author.username}" class="recipe-author"><span th:text="${recipe.author.username}"></span></a>
         <hr class="recipe-sep">
         <img class="recipe-img" th:src="${recipe.photo != null and recipe.photo.length > 0}
              ? 'data:image/jpeg;base64,' + ${recipe.getEncoded()}

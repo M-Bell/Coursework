@@ -22,13 +22,9 @@ public class CommentService {
     private RecipeService recipeService;
 
     public void saveComment(Long id, String comment) {
-        commentDao.saveComment(new Comment(userService.getCurrentUser(),
+        commentDao.save(new Comment(userService.getCurrentUser(),
                 recipeService.getRecipeById(id), comment,
                 Timestamp.valueOf(LocalDateTime.now())));
-    }
-
-    public List<Comment> getAllComments() {
-        return commentDao.getAllComments();
     }
 
     public List<Comment> getAllRelevantCommentsByRecipeId(Long id) {
